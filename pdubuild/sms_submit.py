@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TextIO
 
-from .util import digits_flipped_for_octets
+from .util import digits_flipped_for_octets, encode_ucs2
 
 
 @dataclass
@@ -35,4 +35,6 @@ class SmsSubmit:
         stream.write("0008FF")  # FIXME
         # Write the message
         stream.write("2B")  # len  # FIXME
-        stream.write("060804B49F0101006600300020004800690020004A006F0068006E002000690074002700730020006D0065")  # FIXME
+        #stream.write("060804B49F0101006600300020004800690020004A006F0068006E002000690074002700730020006D0065")  # FIXME
+        stream.write("060804B49F0101")  # FIXME
+        stream.write(encode_ucs2("f0 Hi John it's me"))

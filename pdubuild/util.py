@@ -11,3 +11,7 @@ def digits_flipped_for_octets(digits: str) -> str:
         digits_out.append(second)
         digits_out.append(first)
     return "".join(digits_out)
+
+
+def encode_ucs2(text: str) -> str:
+    return text.encode("utf_16_be").hex().upper()
