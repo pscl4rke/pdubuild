@@ -7,9 +7,27 @@ from .util import digits_flipped_for_octets, encode_ucs2
 
 
 @dataclass
+class UserData:
+    message: str
+
+    def has_header(self) -> bool:
+        return True  # FIXME
+
+    def render_header(self) -> str:
+        return "060804B49F0101"  # FIXME
+
+    def render_body(self) -> str:
+        return encode_ucs2(self.message)
+
+    def rendered_octet_length(self) -> int:
+        return (len(self.render_header()) + len(self.render_body())) // 2
+
+
+@dataclass
 class SmsSubmit:
     smsc: str
     dest: str
+    userdata: UserData
     message_reference: int = 0
     reject_duplicates: bool = False
     status_report_request: bool = False
@@ -22,7 +40,8 @@ class SmsSubmit:
         status += 16  # assume relative validity FIXME
         if self.status_report_request:
             status += 32
-        status += 64  # FIXME don't always have user-data header
+        if self.userdata.has_header():
+            status += 64
         if self.reply_path:
             status += 128
         return status
@@ -52,6 +71,6 @@ class SmsSubmit:
         stream.write("08")  # Use UCS2 FIXME
         stream.write("FF")  # Maximum validity
         # Write the message
-        stream.write("2B")  # len  # FIXME
-        stream.write("060804B49F0101")  # FIXME
-        stream.write(encode_ucs2("f0 Hi John it's me"))  # FIXME
+        stream.write("%02X" % self.userdata.rendered_octet_length())
+        stream.write(self.userdata.render_header())
+        stream.write(self.userdata.render_body())
