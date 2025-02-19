@@ -1,17 +1,24 @@
 
 
+from dataclasses import dataclass
 from typing import TextIO
 
 from .util import digits_flipped_for_octets
 
 
+@dataclass
 class SmsSubmit:
+    smsc: str
 
     def render_to(self, stream: TextIO) -> None:
         # Write the SMSC
-        stream.write("07")  # FIXME
-        stream.write("91")  # FIXME
-        stream.write(digits_flipped_for_octets("447785016005"))  # FIXME
+        smsc_repr = digits_flipped_for_octets(self.smsc.lstrip("+"))
+        stream.write("%02x" % ((len(smsc_repr) // 2) + 1))
+        if self.smsc.startswith("+"):
+            stream.write("91")
+        else:
+            stream.write("81")
+        stream.write(smsc_repr)
         # Write the bitmask
         stream.write("51")  # FIXME
         # Write the message reference
