@@ -9,11 +9,12 @@ from .util import digits_flipped_for_octets
 @dataclass
 class SmsSubmit:
     smsc: str
+    dest: str
 
     def render_to(self, stream: TextIO) -> None:
         # Write the SMSC
         smsc_repr = digits_flipped_for_octets(self.smsc.lstrip("+"))
-        stream.write("%02x" % ((len(smsc_repr) // 2) + 1))
+        stream.write("%02X" % ((len(smsc_repr) // 2) + 1))
         if self.smsc.startswith("+"):
             stream.write("91")
         else:
@@ -24,9 +25,12 @@ class SmsSubmit:
         # Write the message reference
         stream.write("00")  # FIXME
         # Write the destination
-        stream.write("0B")  # FIXME
-        stream.write("81")  # FIXME
-        stream.write(digits_flipped_for_octets("07493574689"))  # FIXME
+        stream.write("%02X" % len(self.dest.lstrip("+")))
+        if self.dest.startswith("+"):
+            stream.write("91")
+        else:
+            stream.write("81")
+        stream.write(digits_flipped_for_octets(self.dest.lstrip("+")))
         # Write assorted metadata
         stream.write("0008FF")  # FIXME
         # Write the message

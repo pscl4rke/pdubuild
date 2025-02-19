@@ -15,5 +15,6 @@ class TestExample(unittest.TestCase):
     def test_example(self):
         pdu = build(
             smsc="+447785016005",
+            dest="07493574689",
         )
         self.assertEqual(pdu, EXAMPLE)
