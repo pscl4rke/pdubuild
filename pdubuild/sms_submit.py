@@ -48,8 +48,10 @@ class SmsSubmit:
             stream.write("81")
         stream.write(digits_flipped_for_octets(self.dest.lstrip("+")))
         # Write assorted metadata
-        stream.write("0008FF")  # FIXME
+        stream.write("00")  # TP-PID (protocol identifier)
+        stream.write("08")  # Use UCS2 FIXME
+        stream.write("FF")  # Maximum validity
         # Write the message
         stream.write("2B")  # len  # FIXME
         stream.write("060804B49F0101")  # FIXME
-        stream.write(encode_ucs2("f0 Hi John it's me"))
+        stream.write(encode_ucs2("f0 Hi John it's me"))  # FIXME
