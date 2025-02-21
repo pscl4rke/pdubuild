@@ -1,15 +1,21 @@
 
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import TextIO
 
 from .util import digits_flipped_for_octets, encode_ucs2
+
+
+class DataEncoding(Enum):
+    UCS2 = 8
 
 
 @dataclass
 class UserData:
     total_parts: int
     sequence_number: int
+    encoding: DataEncoding
     message: str
 
     def has_header(self) -> bool:
@@ -30,7 +36,10 @@ class UserData:
         ))
 
     def render_body(self) -> str:
-        return encode_ucs2(self.message)
+        if self.encoding is DataEncoding.UCS2:
+            return encode_ucs2(self.message)
+        else:
+            raise NotImplementedError(repr(self.encoding))
 
     def rendered_octet_length(self) -> int:
         return (len(self.render_header()) + len(self.render_body())) // 2
@@ -81,7 +90,7 @@ class SmsSubmit:
         stream.write(digits_flipped_for_octets(self.dest.lstrip("+")))
         # Write assorted metadata
         stream.write("00")  # TP-PID (protocol identifier)
-        stream.write("08")  # Use UCS2 FIXME
+        stream.write("%02X" % self.userdata.encoding.value)
         stream.write("FF")  # Maximum validity
         # Write the message
         stream.write("%02X" % self.userdata.rendered_octet_length())

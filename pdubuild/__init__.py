@@ -2,7 +2,7 @@
 
 import io
 
-from .sms_submit import UserData, SmsSubmit
+from .sms_submit import DataEncoding, UserData, SmsSubmit
 
 
 def build(
@@ -11,7 +11,8 @@ def build(
         message: str,
 ) -> str:
     output = io.StringIO()
-    userdata = UserData(total_parts=1, sequence_number=1, message=message)
+    userdata = UserData(total_parts=1, sequence_number=1,
+                        encoding=DataEncoding.UCS2, message=message)
     sms_submit = SmsSubmit(smsc=smsc, dest=dest, userdata=userdata)
     sms_submit.render_to(output)
     return output.getvalue()
