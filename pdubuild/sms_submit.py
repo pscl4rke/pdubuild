@@ -8,13 +8,26 @@ from .util import digits_flipped_for_octets, encode_ucs2
 
 @dataclass
 class UserData:
+    total_parts: int
+    sequence_number: int
     message: str
 
     def has_header(self) -> bool:
         return True  # FIXME
 
     def render_header(self) -> str:
-        return "060804B49F0101"  # FIXME
+        header_body = "".join((
+            self.render_concat_16bit_block(),
+        ))
+        header_body_len = len(header_body) // 2
+        return ("%02X" % header_body_len) + header_body
+
+    def render_concat_16bit_block(self) -> str:
+        return "".join((
+            "0804B49F",  # FIXME stuff
+            "%02X" % self.total_parts,
+            "%02X" % self.sequence_number,
+        ))
 
     def render_body(self) -> str:
         return encode_ucs2(self.message)
