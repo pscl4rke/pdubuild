@@ -13,9 +13,9 @@ EXAMPLE = "079144775810065051000B817094534786F90008FF2B0" \
 class TestExample(unittest.TestCase):
 
     def test_example(self):
-        pdu = build(
+        pdus = list(build(
             smsc="+447785016005",
             dest="07493574689",
             message="f0 Hi John it's me",
-        )
-        self.assertEqual(pdu, EXAMPLE)
+        ))
+        self.assertEqual(pdus, [EXAMPLE])
