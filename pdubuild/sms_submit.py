@@ -8,7 +8,11 @@ from .util import digits_flipped_for_octets, encode_ucs2
 
 
 class DataEncoding(Enum):
-    UCS2 = 8
+    UCS2 = (8, 67)
+
+    def __init__(self, identifier, maxchunksize):
+        self.identifier = identifier
+        self.maxchunksize = maxchunksize
 
 
 @dataclass
@@ -90,7 +94,7 @@ class SmsSubmit:
         stream.write(digits_flipped_for_octets(self.dest.lstrip("+")))
         # Write assorted metadata
         stream.write("00")  # TP-PID (protocol identifier)
-        stream.write("%02X" % self.userdata.encoding.value)
+        stream.write("%02X" % self.userdata.encoding.identifier)
         stream.write("FF")  # Maximum validity
         # Write the message
         stream.write("%02X" % self.userdata.rendered_octet_length())

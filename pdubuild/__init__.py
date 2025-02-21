@@ -20,11 +20,12 @@ def build(
         dest: str,
         message: str,
 ) -> Iterator[str]:
-    chunks = split(67, message)
+    encoding = DataEncoding.UCS2
+    chunks = split(encoding.maxchunksize, message)
     for i, chunk in enumerate(chunks):
         output = io.StringIO()
         userdata = UserData(total_parts=len(chunks), sequence_number=(i + 1),
-                            encoding=DataEncoding.UCS2, message=chunk)
+                            encoding=encoding, message=chunk)
         sms_submit = SmsSubmit(smsc=smsc, dest=dest, userdata=userdata)
         sms_submit.render_to(output)
         yield output.getvalue()
