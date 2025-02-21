@@ -19,8 +19,9 @@ def build(
         smsc: str,
         dest: str,
         message: str,
+        encodewith: str,
 ) -> Iterator[str]:
-    encoding = DataEncoding.UCS2
+    encoding = DataEncoding.from_alias(encodewith)
     chunks = split(encoding.maxchunksize, message)
     for i, chunk in enumerate(chunks):
         output = io.StringIO()

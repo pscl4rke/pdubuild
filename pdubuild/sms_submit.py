@@ -14,6 +14,13 @@ class DataEncoding(Enum):
         self.identifier = identifier
         self.maxchunksize = maxchunksize
 
+    @classmethod
+    def from_alias(self, alias: str) -> "DataEncoding":
+        if alias in ("ucs2",):
+            return DataEncoding.UCS2
+        else:
+            raise ValueError("Unknown encoding: %r" % alias)
+
 
 @dataclass
 class UserData:
