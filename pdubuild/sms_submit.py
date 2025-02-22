@@ -9,7 +9,9 @@ from .util import digits_flipped_for_octets, encode_ucs2, encode_gsm7
 
 class DataEncoding(Enum):
     UCS2 = (8, 67)
-    GSM7 = (0, 134)
+    #GSM7 = (0, 134)
+    #GSM7 = (0, 160)
+    GSM7 = (0, 152)
 
     def __init__(self, identifier, maxchunksize):
         self.identifier = identifier
@@ -32,6 +34,10 @@ class UserData:
     sequence_number: int
     encoding: DataEncoding
     message: str
+
+    def __post_init__(self) -> None:
+        if len(self.message) > self.encoding.maxchunksize:
+            raise ValueError("Message too long for encoding format")
 
     def render_header(self) -> str:
         if not self.has_header:
@@ -61,7 +67,8 @@ class UserData:
         if self.encoding is DataEncoding.UCS2:
             return self.rendered_octet_length()
         elif self.encoding is DataEncoding.GSM7:
-            return len(self.message)
+            header_septs = (len(self.render_header()) * 8) // 7 // 2
+            return header_septs + len(self.message)
         else:
             raise NotImplementedError(repr(self.encoding))
 
