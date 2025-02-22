@@ -53,3 +53,9 @@ class TestOctetting(unittest.TestCase):
     def test_text_one(self):
         octets = bitting.text_to_octets("Hello the")
         self.assertEqual(octets, [0xC8, 0x32, 0x9b, 0xFD, 0x06, 0xD1, 0xD1, 0x65])
+
+    def test_text_longer(self):
+        octets = bitting.text_to_octets("Hello there seven bit version local dest  ")
+        rendered = "".join("%02X" % octet for octet in octets)
+        self.assertEqual(rendered, "C8329BFD06D1D1657919342FDBCB6E90384D07D9CBF27"
+                                   "9FAED06B1DFE3301B442ECFE92010")

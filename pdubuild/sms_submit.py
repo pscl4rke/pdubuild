@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TextIO
 
-from .util import digits_flipped_for_octets, encode_ucs2
+from .util import digits_flipped_for_octets, encode_ucs2, encode_gsm7
 
 
 class DataEncoding(Enum):
     UCS2 = (8, 67)
+    GSM7 = (0, 134)
 
     def __init__(self, identifier, maxchunksize):
         self.identifier = identifier
@@ -18,21 +19,23 @@ class DataEncoding(Enum):
     def from_alias(self, alias: str) -> "DataEncoding":
         if alias in ("ucs2",):
             return DataEncoding.UCS2
+        elif alias in ("gsm7",):
+            return DataEncoding.GSM7
         else:
             raise ValueError("Unknown encoding: %r" % alias)
 
 
 @dataclass
 class UserData:
+    has_header: bool
     total_parts: int
     sequence_number: int
     encoding: DataEncoding
     message: str
 
-    def has_header(self) -> bool:
-        return True  # FIXME
-
     def render_header(self) -> str:
+        if not self.has_header:
+            return ""
         header_body = "".join((
             self.render_concat_16bit_block(),
         ))
@@ -49,6 +52,16 @@ class UserData:
     def render_body(self) -> str:
         if self.encoding is DataEncoding.UCS2:
             return encode_ucs2(self.message)
+        elif self.encoding is DataEncoding.GSM7:
+            return encode_gsm7(self.message)
+        else:
+            raise NotImplementedError(repr(self.encoding))
+
+    def length(self) -> int:
+        if self.encoding is DataEncoding.UCS2:
+            return self.rendered_octet_length()
+        elif self.encoding is DataEncoding.GSM7:
+            return len(self.message)
         else:
             raise NotImplementedError(repr(self.encoding))
 
@@ -73,7 +86,7 @@ class SmsSubmit:
         status += 16  # assume relative validity FIXME
         if self.status_report_request:
             status += 32
-        if self.userdata.has_header():
+        if self.userdata.has_header:
             status += 64
         if self.reply_path:
             status += 128
@@ -104,6 +117,6 @@ class SmsSubmit:
         stream.write("%02X" % self.userdata.encoding.identifier)
         stream.write("FF")  # Maximum validity
         # Write the message
-        stream.write("%02X" % self.userdata.rendered_octet_length())
+        stream.write("%02X" % self.userdata.length())
         stream.write(self.userdata.render_header())
         stream.write(self.userdata.render_body())

@@ -25,8 +25,9 @@ def build(
     chunks = split(encoding.maxchunksize, message)
     for i, chunk in enumerate(chunks):
         output = io.StringIO()
+        has_header = (encodewith == "ucs2")  # somewhat bodgy!
         userdata = UserData(total_parts=len(chunks), sequence_number=(i + 1),
-                            encoding=encoding, message=chunk)
+                            encoding=encoding, message=chunk, has_header=has_header)
         sms_submit = SmsSubmit(smsc=smsc, dest=dest, userdata=userdata)
         sms_submit.render_to(output)
         yield output.getvalue()
