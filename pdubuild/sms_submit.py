@@ -13,7 +13,7 @@ class DataEncoding(Enum):
     #GSM7 = (0, 160)
     GSM7 = (0, 152)
 
-    def __init__(self, identifier, maxchunksize):
+    def __init__(self, identifier: int, maxchunksize: int):
         self.identifier = identifier
         self.maxchunksize = maxchunksize
 

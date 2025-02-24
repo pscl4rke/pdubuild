@@ -39,7 +39,7 @@ def text_to_code_sequence(text: str) -> List[int]:
     return output
 
 
-def text_to_7bit_sequence(source: List[int]) -> List[int]:
+def text_to_7bit_sequence(source: str) -> List[bool]:
     output = []
     for code in text_to_code_sequence(source):
         bits = int_to_bit_sequence(code)
