@@ -6,6 +6,9 @@ import io
 from .sms_submit import DataEncoding, UserData, SmsSubmit
 
 
+__version__ = "0.0.1"
+
+
 def split(chunksize: int, source: str) -> List[str]:
     output = []
     i = 0
