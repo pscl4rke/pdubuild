@@ -6,7 +6,7 @@ import io
 from .sms_submit import DataEncoding, UserData, SmsSubmit
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 def split(chunksize: int, source: str) -> List[str]:
