@@ -34,7 +34,10 @@ CHARS = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%
 def text_to_code_sequence(text: str) -> List[int]:
     output = []
     for char in text:
-        code = CHARS.index(char)
+        try:
+            code = CHARS.index(char)
+        except ValueError:
+            raise ValueError("Cannot encode %r in GSM7 encoding" % char)
         output.append(code)
     return output
 
