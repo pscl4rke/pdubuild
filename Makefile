@@ -1,5 +1,6 @@
 
 libdir := pdubuild
+testdir := test
 
 .PHONY: test
 test:
@@ -9,9 +10,9 @@ pre-release-checks:
 	mypy $(libdir)
 	pyroma .
 
-export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
+release: export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 release: pre-release-checks
-	test "$$(python3 setup.py --version)" = "$$(git describe --tags)"
+	test '$(shell python3 setup.py --version)' = '$(shell git describe)'
 	test ! -d dist
 	python3 setup.py sdist bdist_wheel
 	check-wheel-contents dist
@@ -20,18 +21,24 @@ release: pre-release-checks
 	mv -i build* *.egg-info dist/.
 	mv dist dist.$$(date +%Y-%m-%d.%H%M%S)
 
-docker-to-run += test-in-docker-3.8-slim-bullseye
-docker-to-run += test-in-docker-3.9-slim-bullseye
-docker-to-run += test-in-docker-3.10-slim-bullseye
-docker-to-run += test-in-docker-3.11-slim-bullseye
-docker-to-run += test-in-docker-3.12-slim-bookworm
-test-in-docker: $(docker-to-run)
-
-test-in-docker-%:
+image-to-run += test-in-container-3.8-slim-bullseye
+image-to-run += test-in-container-3.9-slim-bullseye
+image-to-run += test-in-container-3.10-slim-bullseye
+image-to-run += test-in-container-3.11-slim-bullseye
+image-to-run += test-in-container-3.12-slim-bookworm
+test-in-container: $(image-to-run)
 	@echo
-	@echo "===================================================="
+	@echo "=============================================================="
+	@echo "Successfully tested all versions with ephemerun:"
+	@echo "$^" | tr ' ' '\n'
+	@echo "=============================================================="
+	@echo
+
+test-in-container-%:
+	@echo
+	@echo "=============================================================="
 	@echo "Testing with docker.io/library/python:$*"
-	@echo "===================================================="
+	@echo "=============================================================="
 	@echo
 	ephemerun \
 		-i "docker.io/library/python:$*" \
@@ -40,6 +47,6 @@ test-in-docker-%:
 		-S "cp -air ./src/* ." \
 		-S "pip --no-cache-dir install .[testing]" \
 		-S "mypy --cache-dir /dev/null $(libdir)" \
-		-S "coverage run -m unittest discover test/" \
+		-S "coverage run -m unittest discover $(testdir)" \
 		-S "coverage report -m" \
 		-S "(pyroma . || true)"
