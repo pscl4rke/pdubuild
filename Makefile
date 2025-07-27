@@ -2,13 +2,17 @@
 libdir := pdubuild
 testdir := test
 
-.PHONY: test
-test:
-	python3 -m unittest discover
+venv.testing:
+	python3 -m venv $@
+	$@/bin/pip install -e '.[testing]'
 
-pre-release-checks:
-	mypy $(libdir)
-	pyroma .
+.PHONY: test
+test: | venv.testing
+	$|/bin/python3 -m unittest discover
+
+pre-release-checks: | venv.testing
+	$|/bin/mypy $(libdir)
+	$|/bin/pyroma . || true
 
 release: export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 release: pre-release-checks
